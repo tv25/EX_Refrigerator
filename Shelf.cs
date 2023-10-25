@@ -21,7 +21,7 @@ namespace Refrigerator
         private int _size { get; set; }
         public List<Item> _itemsOnShelf { get; set; }
 
-        public Shelf(int shelfFloorNumber,int size, List<Item> itemsOnShelf)
+        public Shelf(int shelfFloorNumber, int size, List<Item> itemsOnShelf)
         {
             _id = _nextID++;
             _shelfFloorNumber = 0;
@@ -33,59 +33,55 @@ namespace Refrigerator
         public int getId() { return _id; }
         public override string ToString()
         {
-            //string itemStr = string.Join("\n", _itemsOnShelf);
+
             return $"ID shelf : {_id}" + " " +
                 $"Floor Shelfe : {_shelfFloorNumber}" + " " +
                 $"Size: {_size}";
-                 //$"Size: {_size}\n{itemStr}";
         }
 
-       public int freeSpaceInShelf(Shelf shelf)
+        public int freeSpaceInShelf(Shelf shelf)
         {
 
             int sumOfAllItems = shelf._itemsOnShelf.Sum(i => i._size);
             int x = ((shelf._size - sumOfAllItems) <= 0) ? 0 : shelf._size - sumOfAllItems;
             return x;
         }
-        
+
         public void addItemToShelf(Item item)
         {
             if (freeSpaceInShelf(this) >= item._size)
             {
                 _itemsOnShelf.Add(item);
-                item._shelfOfItem = this;
+                item._idShelf = this._id;
+                return;
 
             }
-            else
-            {
-                Console.WriteLine("Sorrt,there is no enough place to add this item");
-            }
+            Console.WriteLine("Sorrt,there is no enough place to add this item");
+
         }
-        
+
         public Item takeOffItemFromShelf(int idItem)
         {
             Item foundItem = _itemsOnShelf.Find(i => i._id == idItem);
             if (foundItem != null)
             {
                 _itemsOnShelf.Remove(foundItem);
-                foundItem._shelfOfItem = null;
+                foundItem._idShelf = 0;
                 return foundItem;
             }
             return null;
 
         }
-        
+
 
         public List<Item> getExpiredItem()
         {
             List<Item> expiredItems = _itemsOnShelf.Where(item => item._expiryDate < DateTime.Now).ToList();
-            return expiredItems
+            return expiredItems;
 
-
-;
         }
         public List<Item> getYourFood(Kashrot kashrot, TypeItem typeItem)
-        
+
         {
             List<Item> yourItems = new List<Item>();
             yourItems = (_itemsOnShelf.FindAll(i => i._kashrot == kashrot && i._type == typeItem && i._expiryDate >= DateTime.Now).ToList());
@@ -94,8 +90,8 @@ namespace Refrigerator
 
         public List<Item> getItemeByValues(Kashrot kashrot, DateTime specifyDate)
         {
-            List<Item> foundtems= new List<Item>();
-            foundtems = (_itemsOnShelf.FindAll(i => i._kashrot == kashrot && i._expiryDate< specifyDate).ToList());
+            List<Item> foundtems = new List<Item>();
+            foundtems = (_itemsOnShelf.FindAll(i => i._kashrot == kashrot && i._expiryDate < specifyDate).ToList());
             return foundtems;
         }
     }

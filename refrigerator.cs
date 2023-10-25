@@ -1,15 +1,15 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks;*/
 using static Refrigerator.Item;
-using System.Xml.Linq;
+/*using System.Xml.Linq;
 using System.Runtime.InteropServices;
 using System.Linq.Expressions;
 using System.Collections;
-using System.Diagnostics;
+using System.Diagnostics;*/
 
 namespace Refrigerator
 {
@@ -45,61 +45,57 @@ namespace Refrigerator
             _numOfShelf = numofshelf;
             _shelfes = shelfes;
         }
-        public int getId() { return _id; }
+        public int getId()
+        {
+            return _id;
+        }
         public override string ToString()
         {
-
-            //string itemStr = string.Join("\n", _shelfes);
 
             return $"ID Refriger : {_id}" + " " +
                  $"Color : {_color}" + " " +
                   $"Number Shelfes : {_numOfShelf}" + " " +
                    $"Model: {_model}";
-                // $"Model: {_model}\n{itemStr}";
 
         }
 
         public int freeSpaceInRefrigerator()
         {
             int freeSpace = 0;
-             freeSpace=_shelfes.Sum(s => s.freeSpaceInShelf(s));
+            freeSpace = _shelfes.Sum(s => s.freeSpaceInShelf(s));
             return freeSpace;
         }
 
         public void insertItemToFriger(Item item)
         {
-            if (item._shelfOfItem == null)
-            {
-                Shelf freeShelf = _shelfes.Find(s => s.freeSpaceInShelf(s) >= item._size);
-                if (freeShelf != null)
-                {
-                    freeShelf.addItemToShelf(item);
-                    Console.WriteLine("Your item insert to the friger.");
-
-                }
-                else
-                {
-                    Console.WriteLine("Sorry,there is no enouge place to insert this item");
-                }
-
-            }
-            else
+            if (item._idShelf != 0)
             {
                 Console.WriteLine("Sorry,this item already in the friger");
+                return;
             }
 
+            Shelf freeShelf = _shelfes.Find(s => s.freeSpaceInShelf(s) >= item._size);
+            if (freeShelf == null)
+            {
+                Console.WriteLine("Sorry,there is no enouge place to insert this item");
+                return;
+            }
+            freeShelf.addItemToShelf(item);
+            Console.WriteLine("Your item insert to the friger.");
+
         }
-        
+
         public object takeOffItemFromFriger(int idItem)
         {
-  
+
             foreach (Shelf shelf in _shelfes)
             {
                 Item itemToDelet = shelf.takeOffItemFromShelf(idItem);
                 if (itemToDelet != null)
                 {
                     string msg = "This item is remove from the refrigerator:" + "\n";
-                    return msg + itemToDelet.ToString();
+                    return $"{msg}{itemToDelet.ToString()}";
+
                 }
             }
             return "Sorry,this item is not in the friger ,I cant take it out";
@@ -110,22 +106,19 @@ namespace Refrigerator
         {
             List<Item> expiredItems = new List<Item>();
             _shelfes.ForEach(s => expiredItems.AddRange(s.getExpiredItem()));
-            if(expiredItems.Count > 0)
-            {
-                deletItems(allItem, expiredItems);
-                Console.WriteLine("All expired products were thrown away");
-            }
-            else
+            if (expiredItems.Count <= 0)
             {
                 Console.WriteLine("Sorry, there is no expired item");
+                return;
             }
-           
+            deletItems(allItem, expiredItems);
+            Console.WriteLine("All expired products were thrown away");
+
         }
-        public void deletItems(List<Item> allItem,List<Item>second)
+        public void deletItems(List<Item> allItem, List<Item> second)
         {
             second.ForEach(i => takeOffItemFromFriger(i._id));
             allItem.RemoveAll(item => second.Contains(item));
-
 
         }
 
@@ -136,29 +129,29 @@ namespace Refrigerator
             {
                 yourItems.AddRange(shelf.getYourFood(kashrot, typeItem));
             }
-            ;
 
             return yourItems;
         }
-        
+
         public List<Shelf> sortShelfesInFrige()
         {
             List<Shelf> items = new List<Shelf>();
-            items= _shelfes.OrderByDescending(r => r.freeSpaceInShelf(r)).ToList();
+            items = _shelfes.OrderByDescending(r => r.freeSpaceInShelf(r)).ToList();
             return items;
         }
         public static List<Refrigerator> sortRefriger(List<Refrigerator> r)
         {
             List<Refrigerator> Refriger = new List<Refrigerator>();
-            Refriger = r.OrderByDescending(i =>i.freeSpaceInRefrigerator()).ToList();
+            Refriger = r.OrderByDescending(i => i.freeSpaceInRefrigerator()).ToList();
             return Refriger;
         }
-        public int getSumOfSizeItem(List<Item> items) {
+        public int getSumOfSizeItem(List<Item> items)
+        {
 
-            return  items.Sum(item => item._size);
+            return items.Sum(item => item._size);
         }
-       
-        public List<Item> getItemesByValues(Kashrot kashrot,DateTime specifyDate)
+
+        public List<Item> getItemesByValues(Kashrot kashrot, DateTime specifyDate)
         {
             List<Item> foudItems = new List<Item>();
             foreach (Shelf shelf in _shelfes)
@@ -168,41 +161,41 @@ namespace Refrigerator
             return foudItems;
         }
 
-         public void getReadyForShopping(List<Item>allItems)
-         {
+        public void getReadyForShopping(List<Item> allItems)
+        {
             List<Item> allItemsCanDelet = new List<Item>();
-            int sumAllItemsCanDelet,i = 0;
+            int sumAllItemsCanDelet, i = 0;
             int freeSpace = freeSpaceInRefrigerator();
+            Dictionary<Kashrot, DateTime> kashrotAndTipe = new Dictionary<Kashrot, DateTime>
+            {
+                { Kashrot.Dairy, DateTime.Now.AddDays(3) },
+                { Kashrot.Meat, DateTime.Now.AddDays(7) },
+                { Kashrot.Fur, DateTime.Now.AddDays(1) }
+            };
 
-            Dictionary<Kashrot, DateTime> kashrotAndTipe = new Dictionary<Kashrot, DateTime>();
-            kashrotAndTipe.Add(Kashrot.Dairy, DateTime.Now.AddDays(3));
-            kashrotAndTipe.Add(Kashrot.Meat, DateTime.Now.AddDays(7));
-            kashrotAndTipe.Add(Kashrot.Fur, DateTime.Now.AddDays(1));
-
-            int processNumberToThrowingFood = 1;
+            int processNumberToThrowingFood = 0;
             int place = 20;
             if (freeSpaceInRefrigerator() >= 20)
             {
                 Console.WriteLine("You can do shopping,there is enough place");
                 return;
             }
-
-
-             while (freeSpace < place && processNumberToThrowingFood != 5)
-             {
-                 switch (processNumberToThrowingFood)
-                 {
-                     case 1:
-
-                         deletExpiredItems(allItems);
+            while (freeSpace < place && processNumberToThrowingFood != 5)
+            {
+                processNumberToThrowingFood += 1;
+                switch (processNumberToThrowingFood)
+                {
+                    case 1:
+                        deletExpiredItems(allItems);
                         freeSpace = freeSpaceInRefrigerator();
-                        processNumberToThrowingFood = 2;
-                         break;
-                     case 2:
-                        for(int times = 0; times < 3; times++) {
+                        //processNumberToThrowingFood += 1;
+                        break;
+                    case 2:
+                        for (int times = 0; times < 3; times++)
+                        {
                             allItemsCanDelet.AddRange(getItemesByValues(kashrotAndTipe.ElementAt(i).Key, kashrotAndTipe.ElementAt(i).Value).ToList());
                             sumAllItemsCanDelet = getSumOfSizeItem(allItemsCanDelet);
-                            if(freeSpace+ sumAllItemsCanDelet >= place)
+                            if (freeSpace + sumAllItemsCanDelet >= place)
                             {
                                 deletItems(allItems, allItemsCanDelet);
                                 freeSpace += sumAllItemsCanDelet;
@@ -212,34 +205,32 @@ namespace Refrigerator
                             processNumberToThrowingFood += 1;
                         }
 
-                         break;                    
-                     default:
-                        
-                        break ;
+                        break;
+                    default:
+                        break;
 
-                 }
-             }
-            if (freeSpace >= place && processNumberToThrowingFood == 2)
-            {
-                Console.WriteLine("We threw away all expired foods");
+                }
             }
-            else if (freeSpace >= place && processNumberToThrowingFood > 2)
+            if (freeSpace >= place && processNumberToThrowingFood == 1)
+            {
+                return;
+            }
+            else if (freeSpace >= place && processNumberToThrowingFood > 1)
             {
                 Console.WriteLine("The list of products we threw away:"); ;
                 foreach (Item item in allItemsCanDelet)
                 {
                     Console.WriteLine(item.ToString());
                 }
+                return;
             }
-            else
-            {
-                Console.WriteLine("Sorry, you cannot shop today");
-            }
-                
-            }
+            Console.WriteLine("Sorry, you cannot shop today");
 
-         }
+
+        }
     }
+}
+
 
 
 
